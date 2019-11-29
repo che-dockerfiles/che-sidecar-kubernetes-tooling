@@ -1,0 +1,55 @@
+#
+# Copyright (c) 2019 Red Hat, Inc.
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+
+name: Build and push container
+
+on:
+  push:
+    branches:
+      - '0.1.17'
+
+jobs:
+  build:
+    env:
+      IMAGE_NAME: quay.io/eclipse/che-sidecar-kubernetes-tooling
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Clone source code
+      uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
+
+    - name: Docker build
+      run: |
+        echo "Building image ${IMAGE_NAME}"
+        docker build -t ${IMAGE_NAME} .
+    - name: Docker publish
+      run: |
+        docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD" quay.io
+        GIT_BRANCH=$(echo "${GITHUB_REF}" | cut -d / -f 3)
+        echo "GIT_BRANCH is ${GIT_BRANCH} and GITHUB_REF is ${GITHUB_REF}"
+        GIT_TAG="latest"
+        if [[ "$GIT_BRANCH" != "master" ]]; then
+          GIT_TAG=${GIT_BRANCH}
+        fi
+        # Publish with tag name
+        echo "Publishing image ${IMAGE_NAME}:${GIT_TAG}"
+        docker tag "${IMAGE_NAME}" "${IMAGE_NAME}:${GIT_TAG}"
+        docker push "${IMAGE_NAME}:${GIT_TAG}"
+        # and with specific sha-1
+        echo "Publishing image ${IMAGE_NAME}:${GIT_TAG}-${SHORT_SHA1}"
+        SHORT_SHA1=$(git rev-parse --short HEAD)
+        docker tag "${IMAGE_NAME}" "${IMAGE_NAME}:${GIT_TAG}-${SHORT_SHA1}"
+        docker push "${IMAGE_NAME}:${GIT_TAG}-${SHORT_SHA1}"
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
