@@ -10,11 +10,11 @@
 
 FROM quay.io/buildah/stable:v1.12.0
 
-ENV KUBECTL_VERSION v1.17.2 \
-    HELM_VERSION v3.0.3 \
-    HOME=/home/theia
+ENV KUBECTL_VERSION="v1.17.2" \
+    HELM_VERSION="v3.0.3" \
+    HOME="/home/theia"
 
-ADD etc/storage.conf $HOME/.config/containers/storage.conf
+ADD etc/storage.conf ${HOME}/.config/containers/storage.conf
 
 RUN mkdir /projects && \
     # Change permissions to let any arbitrary user
