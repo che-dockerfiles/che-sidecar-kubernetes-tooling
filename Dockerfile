@@ -8,10 +8,10 @@
 # Contributors:
 #   Red Hat, Inc. - initial API and implementation
 
-FROM quay.io/buildah/stable:v1.11.3
+FROM quay.io/buildah/stable:v1.12.0
 
-ENV KUBECTL_VERSION v1.17.0
-ENV HELM_VERSION v3.0.2
+ENV KUBECTL_VERSION v1.17.2
+ENV HELM_VERSION v3.0.3
 ENV HOME=/home/theia
 
 ADD etc/storage.conf $HOME/.config/containers/storage.conf
