@@ -8,13 +8,13 @@
 # Contributors:
 #   Red Hat, Inc. - initial API and implementation
 
-FROM quay.io/buildah/stable:v1.11.3
+FROM quay.io/buildah/stable:v1.12.0
 
-ENV KUBECTL_VERSION v1.17.0
-ENV HELM_VERSION v3.0.2
-ENV HOME=/home/theia
+ENV KUBECTL_VERSION="v1.17.2" \
+    HELM_VERSION="v3.0.3" \
+    HOME="/home/theia"
 
-ADD etc/storage.conf $HOME/.config/containers/storage.conf
+ADD etc/storage.conf ${HOME}/.config/containers/storage.conf
 
 RUN mkdir /projects && \
     # Change permissions to let any arbitrary user
@@ -25,8 +25,8 @@ RUN mkdir /projects && \
     # buildah login requires writing to /run
     chgrp -R 0 /run && chmod -R g+rwX /run && \
     curl https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl && \
-    chmod +x /usr/local/bin/kubectl && \
     curl -o- -L https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz | tar xvz -C /usr/local/bin --strip 1 && \
+    chmod +x /usr/local/bin/kubectl /usr/local/bin/helm && \
     # 'which' utility is used by VS Code Kubernetes extension to find the binaries, e.g. 'kubectl'
     dnf install -y which nodejs
 
