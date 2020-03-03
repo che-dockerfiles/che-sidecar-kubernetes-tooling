@@ -8,13 +8,15 @@
 # Contributors:
 #   Red Hat, Inc. - initial API and implementation
 
-FROM quay.io/buildah/stable:v1.12.0
+FROM quay.io/buildah/stable:v1.14.0
 
 ENV KUBECTL_VERSION="v1.17.2" \
     HELM_VERSION="v3.0.3" \
     HOME="/home/theia"
 
 ADD etc/storage.conf ${HOME}/.config/containers/storage.conf
+ADD etc/subuid /etc/subuid
+ADD etc/subgid /etc/subgid
 
 RUN mkdir /projects && \
     # Change permissions to let any arbitrary user
