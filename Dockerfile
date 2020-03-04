@@ -10,8 +10,8 @@
 
 FROM quay.io/buildah/stable:v1.14.0
 
-ENV KUBECTL_VERSION="v1.17.2" \
-    HELM_VERSION="v3.0.3" \
+ENV KUBECTL_VERSION="v1.17.3" \
+    HELM_VERSION="v3.1.1" \
     HOME="/home/theia"
 
 ADD etc/storage.conf ${HOME}/.config/containers/storage.conf
