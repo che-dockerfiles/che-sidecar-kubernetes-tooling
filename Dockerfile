@@ -34,5 +34,10 @@ RUN mkdir /projects && \
 
 ADD etc/entrypoint.sh /entrypoint.sh
 
+RUN mkdir -p /var/tmp/containers/runtime && \
+    chmod -R g+rwX /var/tmp/containers
+
+ENV XDG_RUNTIME_DIR /var/tmp/containers/runtime
+
 ENTRYPOINT [ "/entrypoint.sh" ]
 CMD ${PLUGIN_REMOTE_ENDPOINT_EXECUTABLE}
