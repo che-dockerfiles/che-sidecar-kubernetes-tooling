@@ -8,13 +8,15 @@
 # Contributors:
 #   Red Hat, Inc. - initial API and implementation
 
-FROM quay.io/buildah/stable:v1.12.0
+FROM quay.io/buildah/stable:v1.14.0
 
-ENV KUBECTL_VERSION="v1.17.2" \
-    HELM_VERSION="v3.0.3" \
+ENV KUBECTL_VERSION="v1.17.3" \
+    HELM_VERSION="v3.1.1" \
     HOME="/home/theia"
 
 ADD etc/storage.conf ${HOME}/.config/containers/storage.conf
+ADD etc/subuid /etc/subuid
+ADD etc/subgid /etc/subgid
 
 RUN mkdir /projects && \
     # Change permissions to let any arbitrary user
@@ -31,6 +33,11 @@ RUN mkdir /projects && \
     dnf install -y which nodejs
 
 ADD etc/entrypoint.sh /entrypoint.sh
+
+RUN mkdir -p /var/tmp/containers/runtime && \
+    chmod -R g+rwX /var/tmp/containers
+
+ENV XDG_RUNTIME_DIR /var/tmp/containers/runtime
 
 ENTRYPOINT [ "/entrypoint.sh" ]
 CMD ${PLUGIN_REMOTE_ENDPOINT_EXECUTABLE}
