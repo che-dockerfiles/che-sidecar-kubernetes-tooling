@@ -30,14 +30,13 @@ RUN mkdir /projects && \
     curl -o- -L https://get.helm.sh/helm-${HELM_VERSION}-linux-amd64.tar.gz | tar xvz -C /usr/local/bin --strip 1 && \
     chmod +x /usr/local/bin/kubectl /usr/local/bin/helm && \
     # 'which' utility is used by VS Code Kubernetes extension to find the binaries, e.g. 'kubectl'
-    dnf install -y which nodejs
-
-ADD etc/entrypoint.sh /entrypoint.sh
-
-RUN mkdir -p /var/tmp/containers/runtime && \
+    dnf install -y which nodejs && \
+    mkdir -p /var/tmp/containers/runtime && \
     chmod -R g+rwX /var/tmp/containers
 
 ENV XDG_RUNTIME_DIR /var/tmp/containers/runtime
+
+ADD etc/entrypoint.sh /entrypoint.sh
 
 ENTRYPOINT [ "/entrypoint.sh" ]
 CMD ${PLUGIN_REMOTE_ENDPOINT_EXECUTABLE}
