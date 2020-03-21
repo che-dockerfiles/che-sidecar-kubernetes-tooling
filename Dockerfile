@@ -8,13 +8,14 @@
 # Contributors:
 #   Red Hat, Inc. - initial API and implementation
 
-FROM quay.io/buildah/stable:v1.14.0
+FROM quay.io/buildah/stable:v1.14.3
 
 ENV KUBECTL_VERSION="v1.17.3" \
     HELM_VERSION="v3.1.1" \
     HOME="/home/theia"
 
 ADD etc/storage.conf ${HOME}/.config/containers/storage.conf
+ADD etc/containers.conf ${HOME}/.config/containers/containers.conf
 ADD etc/subuid /etc/subuid
 ADD etc/subgid /etc/subgid
 
