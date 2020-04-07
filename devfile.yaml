@@ -65,11 +65,11 @@ commands:
           if [ -f "/tmp/username" ]; then \
             USERNAME=`cat /tmp/username`; \
             PLUGIN_IMAGE_ID=`buildah images -q quay.io/$USERNAME/che-sidecar-kubernetes-tooling`; \
-            echo 'The last built image ID is : $PLUGIN_IMAGE_ID'; \
+            echo 'The last built image ID is :' $PLUGIN_IMAGE_ID; \
             PLUGIN_IMAGE=quay.io/$USERNAME/che-sidecar-kubernetes-tooling:dev; \
             echo 'Writing plugin image to a file in temp...'; \
             echo $PLUGIN_IMAGE > /tmp/plugin_image; \
-            echo 'Pushing image $PLUGIN_IMAGE'; \
+            echo 'Pushing image' $PLUGIN_IMAGE; \
             buildah push $PLUGIN_IMAGE_ID docker://$PLUGIN_IMAGE; \
             echo 'Done'; \
           else \
@@ -83,19 +83,19 @@ commands:
         type: exec
         command: |
           if [ -f "/tmp/username" ]; then \
+            echo 'Downloading template for plugin meta.yaml...'; \
+            curl -o /projects/plugin-template.meta.yaml https://raw.githubusercontent.com/vitaliy-guliy/che-sidecar-kubernetes-tooling/dev/plugin-template.meta.yaml; \
             echo 'Generating plugin meta.yaml...'; \
             PLUGIN_IMAGE=`cat /tmp/plugin_image`; \
-            node -pe "require('fs').writeFileSync('/tmp/plugin_gist.json', \
-            	require('fs').readFileSync('/projects/plugin-template.meta.yaml').toString() \
-            	.replace(/PLUGIN_IMAGE/g, '$PLUGIN_IMAGE'), 'utf8')?'':'Generating plugin meta.yaml...'"; \
-            echo 'Done'; \
+            PLUGIN_META_YAML=`node -pe "JSON.stringify(require('fs').readFileSync('/projects/plugin-template.meta.yaml').toString().replace(/PLUGIN_IMAGE/g, '$PLUGIN_IMAGE'))"`; \
             read -p "GitHub login: " GITHUB_LOGIN; \
             read -s -p "GitHub password: " GITHUB_PASSWORD; \
             echo 'Pushing plugin meta.yaml to gist...'; \
-            curl -X POST \
-                  -d '{"public":true,"files":{"kubernetes-plugin.meta.yaml":{"content":"file content"}}}' \
-                  -u $GITHUB_LOGIN:$GITHUB_PASSWORD \
-                  https://api.github.com/gists > /projects/plugin.gist.json; \
+            POST_DATA='{"public":true,"files":{"plugin.meta.yaml":{"content":'$PLUGIN_META_YAML'}}}'; \
+            CURL_COMMAND=`echo "curl -X POST -d '"$POST_DATA"' -u "$GITHUB_LOGIN:$GITHUB_PASSWORD" https://api.github.com/gists > /projects/plugin.gist.json"`; \
+            eval $CURL_COMMAND; \
+            META_YAML_RAW_URL=`node -pe "JSON.parse(require('fs').readFileSync('/projects/plugin.gist.json').toString()).files['plugin.meta.yaml'].raw_url"`; \
+            echo 'Plugin meta.yaml URL' $META_YAML_RAW_URL; \
             echo 'Done'; \
           else \
             echo 'The first, you need to login and build the image'; \
