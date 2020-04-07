@@ -1,0 +1,104 @@
+apiVersion: 1.0.0
+
+metadata:
+  name: kubernetes-tooling-dev
+
+projects:
+  - name: che-sidecar-kubernetes-tooling
+    source:
+      location: 'https://github.com/che-dockerfiles/che-sidecar-kubernetes-tooling'
+      type: git
+      branch: master
+
+components:
+  - type: cheEditor
+    id: eclipse/che-theia/7.10.0
+    memoryLimit: 1500M
+
+  - type: dockerimage
+    image: 'quay.io/eclipse/che-sidecar-kubernetes-tooling:1.1.0-31a8464'
+    alias: buildah-dev
+    mountSources: true
+    memoryLimit: 3Gi
+    env:
+      - name: PLUGIN_REMOTE_ENDPOINT_EXECUTABLE
+        value: 'tail -f /dev/null'
+
+commands:
+
+  - name: '1. Login to quay.io'
+    actions:
+      - workdir: /projects/che-sidecar-kubernetes-tooling
+        type: exec
+        command: |
+          if [ ! -f "/tmp/username" ]; then \
+            read -p "Username: " USERNAME && \
+            buildah login --username $USERNAME quay.io && \
+            echo $USERNAME > /tmp/username && \
+            echo 'Done'; \
+          else \
+            echo 'You already logged in as' `cat /tmp/username`; \
+          fi
+        component: buildah-dev
+
+  - name: '2. Build the image'
+    actions:
+      - workdir: /projects/che-sidecar-kubernetes-tooling
+        type: exec
+        command: |
+          if [ -f "/tmp/username" ]; then \
+            USERNAME=`cat /tmp/username`; \
+            buildah bud -t quay.io/$USERNAME/che-sidecar-kubernetes-tooling:dev .; \
+            echo 'Image built'; \
+            buildah images; \
+            echo 'Done'; \
+          else \
+            echo 'You need to login the first'; \
+          fi
+        component: buildah-dev
+
+  - name: '3. Push to quay.io'
+    actions:
+      - workdir: /projects/che-sidecar-kubernetes-tooling
+        type: exec
+        command: |
+          if [ -f "/tmp/username" ]; then \
+            USERNAME=`cat /tmp/username`; \
+            PLUGIN_IMAGE_ID=`buildah images -q quay.io/$USERNAME/che-sidecar-kubernetes-tooling`; \
+            echo 'The last built image ID is : $PLUGIN_IMAGE_ID'; \
+            PLUGIN_IMAGE=quay.io/$USERNAME/che-sidecar-kubernetes-tooling:dev; \
+            echo 'Writing plugin image to a file in temp...'; \
+            echo $PLUGIN_IMAGE > /tmp/plugin_image; \
+            echo 'Pushing image $PLUGIN_IMAGE'; \
+            buildah push $PLUGIN_IMAGE_ID docker://$PLUGIN_IMAGE; \
+            echo 'Done'; \
+          else \
+            echo 'The first, you need to login and build the image'; \
+          fi
+        component: buildah-dev
+
+  - name: '4. Create Gist with meta.yaml'
+    actions:
+      - workdir: /projects/che-sidecar-kubernetes-tooling
+        type: exec
+        command: |
+          if [ -f "/tmp/username" ]; then \
+            echo 'Generating plugin meta.yaml...'; \
+            PLUGIN_IMAGE=`cat /tmp/plugin_image`; \
+            node -pe "require('fs').writeFileSync('/tmp/plugin_gist.json', \
+            	require('fs').readFileSync('/projects/plugin-template.meta.yaml').toString() \
+            	.replace(/PLUGIN_IMAGE/g, '$PLUGIN_IMAGE'), 'utf8')?'':'Generating plugin meta.yaml...'"; \
+            echo 'Done'; \
+            read -p "GitHub login: " GITHUB_LOGIN; \
+            read -s -p "GitHub password: " GITHUB_PASSWORD; \
+            echo 'Pushing plugin meta.yaml to gist...'; \
+            curl -X POST \
+                  -d '{"public":true,"files":{"kubernetes-plugin.meta.yaml":{"content":"file content"}}}' \
+                  -u $GITHUB_LOGIN:$GITHUB_PASSWORD \
+                  https://api.github.com/gists > /projects/plugin.gist.json; \
+            echo 'Done'; \
+          else \
+            echo 'The first, you need to login and build the image'; \
+          fi
+        component: buildah-dev
+
