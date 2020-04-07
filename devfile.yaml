@@ -77,7 +77,7 @@ commands:
           fi
         component: buildah-dev
 
-  - name: '4. Create Gist with plugin meta.yaml'
+  - name: '4. Publish plugin.meta.yaml'
     actions:
       - workdir: /projects/che-sidecar-kubernetes-tooling
         type: exec
@@ -103,7 +103,7 @@ commands:
           fi
         component: buildah-dev
 
-  - name: '4. Create Gist with devfile.yaml'
+  - name: '4. Publish devfile.yaml'
     actions:
       - workdir: /projects/che-sidecar-kubernetes-tooling
         type: exec
@@ -113,16 +113,15 @@ commands:
             curl -o /tmp/devfile-template.yaml https://raw.githubusercontent.com/vitaliy-guliy/che-sidecar-kubernetes-tooling/dev/devfile-template.yaml; \
             echo 'Generating devfile.yaml...'; \
             PLUGIN_GIST_URL=`cat /tmp/plugin.gist.url`; \
-            DEVFILE_YAML=`node -pe "JSON.stringify(require('fs').readFileSync('/tmp/devfile-template.meta.yaml').toString().replace(/PLUGIN_GIST_URL/g, '$PLUGIN_GIST_URL'))"`; \
+            DEVFILE_YAML=`node -pe "JSON.stringify(require('fs').readFileSync('/tmp/devfile-template.yaml').toString().replace(/PLUGIN_GIST_URL/g, '$PLUGIN_GIST_URL'))"`; \
             read -p "GitHub login: " GITHUB_LOGIN; \
             read -s -p "GitHub password: " GITHUB_PASSWORD; \
             echo 'Pushing devfile.yaml to gist...'; \
-            POST_DATA='{"public":true,"files":{"devfile.yaml":{"content":'$PLUGIN_META_YAML'}}}'; \
-            CURL_COMMAND=`echo "curl -X POST -d '"$POST_DATA"' -u "$GITHUB_LOGIN:$GITHUB_PASSWORD" https://api.github.com/gists > /tmp/plugin.gist.json"`; \
+            POST_DATA='{"public":true,"files":{"devfile.yaml":{"content":'$DEVFILE_YAML'}}}'; \
+            CURL_COMMAND=`echo "curl -X POST -d '"$POST_DATA"' -u "$GITHUB_LOGIN:$GITHUB_PASSWORD" https://api.github.com/gists > /tmp/devfile.gist.json"`; \
             eval $CURL_COMMAND; \
-            META_YAML_RAW_URL=`node -pe "JSON.parse(require('fs').readFileSync('/tmp/plugin.gist.json').toString()).files['plugin.meta.yaml'].raw_url"`; \
-            echo 'Plugin meta.yaml URL' $META_YAML_RAW_URL; \
-            echo $META_YAML_RAW_URL > /tmp/plugin.gist.url
+            DEVFILE_RAW_URL=`node -pe "JSON.parse(require('fs').readFileSync('/tmp/devfile.gist.json').toString()).files['devfile.yaml'].raw_url"`; \
+            echo 'Devfile.yaml URL' $DEVFILE_RAW_URL; \
             echo 'Done'; \
           else \
             echo 'The first, you need to login and build the image'; \
