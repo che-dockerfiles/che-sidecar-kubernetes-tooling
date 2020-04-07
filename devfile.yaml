@@ -77,25 +77,52 @@ commands:
           fi
         component: buildah-dev
 
-  - name: '4. Create Gist with meta.yaml'
+  - name: '4. Create Gist with plugin meta.yaml'
     actions:
       - workdir: /projects/che-sidecar-kubernetes-tooling
         type: exec
         command: |
           if [ -f "/tmp/username" ]; then \
             echo 'Downloading template for plugin meta.yaml...'; \
-            curl -o /projects/plugin-template.meta.yaml https://raw.githubusercontent.com/vitaliy-guliy/che-sidecar-kubernetes-tooling/dev/plugin-template.meta.yaml; \
+            curl -o /tmp/plugin-template.meta.yaml https://raw.githubusercontent.com/vitaliy-guliy/che-sidecar-kubernetes-tooling/dev/plugin-template.meta.yaml; \
             echo 'Generating plugin meta.yaml...'; \
             PLUGIN_IMAGE=`cat /tmp/plugin_image`; \
-            PLUGIN_META_YAML=`node -pe "JSON.stringify(require('fs').readFileSync('/projects/plugin-template.meta.yaml').toString().replace(/PLUGIN_IMAGE/g, '$PLUGIN_IMAGE'))"`; \
+            PLUGIN_META_YAML=`node -pe "JSON.stringify(require('fs').readFileSync('/tmp/plugin-template.meta.yaml').toString().replace(/PLUGIN_IMAGE/g, '$PLUGIN_IMAGE'))"`; \
             read -p "GitHub login: " GITHUB_LOGIN; \
             read -s -p "GitHub password: " GITHUB_PASSWORD; \
             echo 'Pushing plugin meta.yaml to gist...'; \
             POST_DATA='{"public":true,"files":{"plugin.meta.yaml":{"content":'$PLUGIN_META_YAML'}}}'; \
-            CURL_COMMAND=`echo "curl -X POST -d '"$POST_DATA"' -u "$GITHUB_LOGIN:$GITHUB_PASSWORD" https://api.github.com/gists > /projects/plugin.gist.json"`; \
+            CURL_COMMAND=`echo "curl -X POST -d '"$POST_DATA"' -u "$GITHUB_LOGIN:$GITHUB_PASSWORD" https://api.github.com/gists > /tmp/plugin.gist.json"`; \
             eval $CURL_COMMAND; \
-            META_YAML_RAW_URL=`node -pe "JSON.parse(require('fs').readFileSync('/projects/plugin.gist.json').toString()).files['plugin.meta.yaml'].raw_url"`; \
+            PLUGIN_GIST_URL=`node -pe "JSON.parse(require('fs').readFileSync('/tmp/plugin.gist.json').toString()).files['plugin.meta.yaml'].raw_url"`; \
+            echo 'Plugin gist URL' $PLUGIN_GIST_URL; \
+            echo $PLUGIN_GIST_URL > /tmp/plugin.gist.url
+            echo 'Done'; \
+          else \
+            echo 'The first, you need to login and build the image'; \
+          fi
+        component: buildah-dev
+
+  - name: '4. Create Gist with devfile.yaml'
+    actions:
+      - workdir: /projects/che-sidecar-kubernetes-tooling
+        type: exec
+        command: |
+          if [ -f "/tmp/username" ]; then \
+            echo 'Downloading template for plugin meta.yaml...'; \
+            curl -o /tmp/plugin-template.meta.yaml https://raw.githubusercontent.com/vitaliy-guliy/che-sidecar-kubernetes-tooling/dev/plugin-template.meta.yaml; \
+            echo 'Generating plugin meta.yaml...'; \
+            PLUGIN_IMAGE=`cat /tmp/plugin_image`; \
+            PLUGIN_META_YAML=`node -pe "JSON.stringify(require('fs').readFileSync('/tmp/plugin-template.meta.yaml').toString().replace(/PLUGIN_IMAGE/g, '$PLUGIN_IMAGE'))"`; \
+            read -p "GitHub login: " GITHUB_LOGIN; \
+            read -s -p "GitHub password: " GITHUB_PASSWORD; \
+            echo 'Pushing plugin meta.yaml to gist...'; \
+            POST_DATA='{"public":true,"files":{"plugin.meta.yaml":{"content":'$PLUGIN_META_YAML'}}}'; \
+            CURL_COMMAND=`echo "curl -X POST -d '"$POST_DATA"' -u "$GITHUB_LOGIN:$GITHUB_PASSWORD" https://api.github.com/gists > /tmp/plugin.gist.json"`; \
+            eval $CURL_COMMAND; \
+            META_YAML_RAW_URL=`node -pe "JSON.parse(require('fs').readFileSync('/tmp/plugin.gist.json').toString()).files['plugin.meta.yaml'].raw_url"`; \
             echo 'Plugin meta.yaml URL' $META_YAML_RAW_URL; \
+            echo $META_YAML_RAW_URL > /tmp/plugin.gist.url
             echo 'Done'; \
           else \
             echo 'The first, you need to login and build the image'; \
