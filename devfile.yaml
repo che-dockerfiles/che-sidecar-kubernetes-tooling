@@ -103,7 +103,7 @@ commands:
           fi
         component: buildah-dev
 
-  - name: '4. Publish devfile.yaml'
+  - name: '5. Publish devfile.yaml'
     actions:
       - workdir: /projects/che-sidecar-kubernetes-tooling
         type: exec
