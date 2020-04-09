@@ -11,12 +11,14 @@
 
 if [ -f "/tmp/username" ]; then
     USERNAME=`cat /tmp/username`
+    
     PLUGIN_IMAGE_ID=`buildah images -q quay.io/$USERNAME/che-sidecar-kubernetes-tooling`
     echo 'The last built image ID is :' $PLUGIN_IMAGE_ID
+
     PLUGIN_IMAGE=quay.io/$USERNAME/che-sidecar-kubernetes-tooling:dev
-    echo 'Writing plugin image to a file in temp...'
-    echo $PLUGIN_IMAGE > /tmp/plugin_image
     echo 'Pushing image' $PLUGIN_IMAGE
+    echo $PLUGIN_IMAGE > /tmp/plugin_image
+
     buildah push $PLUGIN_IMAGE_ID docker://$PLUGIN_IMAGE
     echo 'Done'
 else

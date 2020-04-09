@@ -11,8 +11,10 @@
 
 if [ -f "/tmp/username" ]; then
     USERNAME=`cat /tmp/username`
+
     buildah bud -t quay.io/$USERNAME/che-sidecar-kubernetes-tooling:dev .
     echo 'Image built'
+
     buildah images
     echo 'Done'
 else
