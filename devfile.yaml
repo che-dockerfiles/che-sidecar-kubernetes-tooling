@@ -31,6 +31,8 @@ components:
     env:
       - name: PLUGIN_REMOTE_ENDPOINT_EXECUTABLE
         value: 'tail -f /dev/null'
+      - name: DEV_RESOURCES
+        value: 'https://raw.githubusercontent.com/vitaliy-guliy/che-sidecar-kubernetes-tooling/dev/dev'
 
 commands:
 
@@ -41,7 +43,7 @@ commands:
         command: |
           if [ ! -f "dev/login.sh" ]; then \
             mkdir -p dev; \
-            curl -o dev/login.sh https://raw.githubusercontent.com/vitaliy-guliy/che-sidecar-kubernetes-tooling/dev/dev/login.sh; \
+            curl -o dev/login.sh $DEV_RESOURCES/login.sh; \
             chmod +x dev/login.sh; \
           fi; \
           dev/login.sh
@@ -54,7 +56,7 @@ commands:
         command: |
           if [ ! -f "dev/build.sh" ]; then \
             mkdir -p dev; \
-            curl -o dev/build.sh https://raw.githubusercontent.com/vitaliy-guliy/che-sidecar-kubernetes-tooling/dev/dev/build.sh; \
+            curl -o dev/build.sh DEV_RESOURCES/build.sh; \
             chmod +x dev/build.sh; \
           fi; \
           pwd; \
@@ -68,7 +70,7 @@ commands:
         command: |
           if [ ! -f "dev/push.sh" ]; then \
             mkdir -p dev; \
-            curl -o dev/push.sh https://raw.githubusercontent.com/vitaliy-guliy/che-sidecar-kubernetes-tooling/dev/dev/push.sh; \
+            curl -o dev/push.sh DEV_RESOURCES/push.sh; \
             chmod +x dev/push.sh; \
           fi; \
           pwd; \
@@ -82,7 +84,7 @@ commands:
         command: |
           if [ ! -f "dev/publish.meta.yaml.sh" ]; then \
             mkdir -p dev; \
-            curl -o dev/publish.meta.yaml.sh https://raw.githubusercontent.com/vitaliy-guliy/che-sidecar-kubernetes-tooling/dev/dev/publish.meta.yaml.sh; \
+            curl -o dev/publish.meta.yaml.sh DEV_RESOURCES/publish.meta.yaml.sh; \
             chmod +x dev/publish.meta.yaml.sh; \
           fi; \
           pwd; \
@@ -96,7 +98,7 @@ commands:
         command: |
           if [ ! -f "dev/publish.devfile.sh" ]; then \
             mkdir -p dev; \
-            curl -o dev/publish.devfile.sh https://raw.githubusercontent.com/vitaliy-guliy/che-sidecar-kubernetes-tooling/dev/dev/publish.devfile.sh; \
+            curl -o dev/publish.devfile.sh DEV_RESOURCES/publish.devfile.sh; \
             chmod +x dev/publish.devfile.sh; \
           fi; \
           pwd; \
