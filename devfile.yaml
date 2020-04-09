@@ -52,7 +52,14 @@ commands:
     actions:
       - workdir: /projects/che-sidecar-kubernetes-tooling
         type: exec
-        command: dev/build.sh
+        command:
+          if [ ! -f "dev/build.sh" ]; then \
+            mkdir -p dev; \
+            curl -o dev/build.sh https://raw.githubusercontent.com/vitaliy-guliy/che-sidecar-kubernetes-tooling/dev/dev/build.sh; \
+            chmod +x dev/build.sh; \
+          fi; \
+          pwd; \
+          ./dev/build.sh        
         component: buildah-dev
 
   - name: '3. Push to quay.io'
