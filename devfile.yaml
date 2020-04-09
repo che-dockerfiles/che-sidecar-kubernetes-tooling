@@ -6,7 +6,15 @@ metadata:
 projects:
   - name: che-sidecar-kubernetes-tooling
     source:
-      location: 'https://github.com/che-dockerfiles/che-sidecar-kubernetes-tooling'
+      # location: 'https://github.com/che-dockerfiles/che-sidecar-kubernetes-tooling'
+      location: 'https://github.com/vitaliy-guliy/che-sidecar-kubernetes-tooling'
+      type: git
+      # branch: master
+      branch: dev
+
+  - name: vscode-kubernetes-tools
+    source:
+      location: 'https://github.com/Azure/vscode-kubernetes-tools'
       type: git
       branch: master
 
@@ -30,31 +38,14 @@ commands:
     actions:
       - workdir: /projects/che-sidecar-kubernetes-tooling
         type: exec
-        command: |
-          if [ ! -f "/tmp/username" ]; then \
-            read -p "Username: " USERNAME && \
-            buildah login --username $USERNAME quay.io && \
-            echo $USERNAME > /tmp/username && \
-            echo 'Done'; \
-          else \
-            echo 'You already logged in as' `cat /tmp/username`; \
-          fi
+        command: dev/login.sh
         component: buildah-dev
 
   - name: '2. Build the image'
     actions:
       - workdir: /projects/che-sidecar-kubernetes-tooling
         type: exec
-        command: |
-          if [ -f "/tmp/username" ]; then \
-            USERNAME=`cat /tmp/username`; \
-            buildah bud -t quay.io/$USERNAME/che-sidecar-kubernetes-tooling:dev .; \
-            echo 'Image built'; \
-            buildah images; \
-            echo 'Done'; \
-          else \
-            echo 'You need to login the first'; \
-          fi
+        command: dev/build.sh
         component: buildah-dev
 
   - name: '3. Push to quay.io'
