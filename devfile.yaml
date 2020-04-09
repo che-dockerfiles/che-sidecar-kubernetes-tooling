@@ -43,7 +43,7 @@ commands:
             mkdir -p dev; \
             curl -o dev/login.sh https://raw.githubusercontent.com/vitaliy-guliy/che-sidecar-kubernetes-tooling/dev/dev/login.sh; \
             chmod +x dev/login.sh; \
-          fi \
+          fi; \
           pwd; \
           ./dev/login.sh
         component: buildah-dev
