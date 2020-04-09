@@ -56,7 +56,7 @@ commands:
         command: |
           if [ ! -f "dev/build.sh" ]; then \
             mkdir -p dev; \
-            curl -o dev/build.sh DEV_RESOURCES/build.sh; \
+            curl -o dev/build.sh $DEV_RESOURCES/build.sh; \
             chmod +x dev/build.sh; \
           fi; \
           pwd; \
@@ -70,7 +70,7 @@ commands:
         command: |
           if [ ! -f "dev/push.sh" ]; then \
             mkdir -p dev; \
-            curl -o dev/push.sh DEV_RESOURCES/push.sh; \
+            curl -o dev/push.sh $DEV_RESOURCES/push.sh; \
             chmod +x dev/push.sh; \
           fi; \
           pwd; \
@@ -84,7 +84,7 @@ commands:
         command: |
           if [ ! -f "dev/publish.meta.yaml.sh" ]; then \
             mkdir -p dev; \
-            curl -o dev/publish.meta.yaml.sh DEV_RESOURCES/publish.meta.yaml.sh; \
+            curl -o dev/publish.meta.yaml.sh $DEV_RESOURCES/publish.meta.yaml.sh; \
             chmod +x dev/publish.meta.yaml.sh; \
           fi; \
           pwd; \
@@ -98,7 +98,7 @@ commands:
         command: |
           if [ ! -f "dev/publish.devfile.sh" ]; then \
             mkdir -p dev; \
-            curl -o dev/publish.devfile.sh DEV_RESOURCES/publish.devfile.sh; \
+            curl -o dev/publish.devfile.sh $DEV_RESOURCES/publish.devfile.sh; \
             chmod +x dev/publish.devfile.sh; \
           fi; \
           pwd; \
