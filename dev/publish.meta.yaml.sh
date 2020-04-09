@@ -11,7 +11,7 @@
 
 if [ -f "/tmp/username" ]; then
     echo 'Downloading template for plugin meta.yaml...'
-    curl -o /tmp/plugin-template.meta.yaml https://raw.githubusercontent.com/vitaliy-guliy/che-sidecar-kubernetes-tooling/dev/plugin-template.meta.yaml
+    curl -o /tmp/plugin-template.meta.yaml https://raw.githubusercontent.com/vitaliy-guliy/che-sidecar-kubernetes-tooling/dev/dev/plugin-template.meta.yaml
 
     echo 'Generating plugin meta.yaml...'
     PLUGIN_IMAGE=`cat /tmp/plugin_image`

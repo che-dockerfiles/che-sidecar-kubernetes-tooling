@@ -11,7 +11,7 @@
 
 if [ -f "/tmp/username" ]; then
     echo 'Downloading template for devfile.yaml...'
-    curl -o /tmp/devfile-template.yaml https://raw.githubusercontent.com/vitaliy-guliy/che-sidecar-kubernetes-tooling/dev/devfile-template.yaml
+    curl -o /tmp/devfile-template.yaml https://raw.githubusercontent.com/vitaliy-guliy/che-sidecar-kubernetes-tooling/dev/dev/devfile-template.yaml
 
     echo 'Generating devfile.yaml...'
     PLUGIN_GIST_URL=`cat /tmp/plugin.gist.url`
