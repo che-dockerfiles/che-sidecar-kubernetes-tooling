@@ -43,8 +43,9 @@ commands:
             mkdir -p dev; \
             curl -o dev/login.sh https://raw.githubusercontent.com/vitaliy-guliy/che-sidecar-kubernetes-tooling/dev/dev/login.sh; \
             chmod +x dev/login.sh; \
-          fi; \
-          dev/login.sh
+          fi \
+          pwd; \
+          ./dev/login.sh
         component: buildah-dev
 
   - name: '2. Build the image'
