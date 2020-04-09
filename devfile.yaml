@@ -6,11 +6,11 @@ metadata:
 projects:
   - name: che-sidecar-kubernetes-tooling
     source:
-      # location: 'https://github.com/che-dockerfiles/che-sidecar-kubernetes-tooling'
-      location: 'https://github.com/vitaliy-guliy/che-sidecar-kubernetes-tooling'
+      location: 'https://github.com/che-dockerfiles/che-sidecar-kubernetes-tooling'
+      # location: 'https://github.com/vitaliy-guliy/che-sidecar-kubernetes-tooling'
       type: git
-      # branch: master
-      branch: dev
+      branch: master
+      # branch: dev
 
   - name: vscode-kubernetes-tools
     source:
@@ -38,7 +38,10 @@ commands:
     actions:
       - workdir: /projects/che-sidecar-kubernetes-tooling
         type: exec
-        command: dev/login.sh
+        command: |
+          mkdir -p dev; \
+          curl -o dev/login.sh https://raw.githubusercontent.com/vitaliy-guliy/che-sidecar-kubernetes-tooling/dev/dev/login.sh; \
+          dev/login.sh
         component: buildah-dev
 
   - name: '2. Build the image'
