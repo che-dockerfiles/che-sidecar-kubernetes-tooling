@@ -39,8 +39,11 @@ commands:
       - workdir: /projects/che-sidecar-kubernetes-tooling
         type: exec
         command: |
-          mkdir -p dev; \
-          curl -o dev/login.sh https://raw.githubusercontent.com/vitaliy-guliy/che-sidecar-kubernetes-tooling/dev/dev/login.sh; \
+          if [ ! -f "dev/login.sh" ]; then \
+            mkdir -p dev; \
+            curl -o dev/login.sh https://raw.githubusercontent.com/vitaliy-guliy/che-sidecar-kubernetes-tooling/dev/dev/login.sh; \
+            chmod +x dev/login.sh; \
+          fi \
           dev/login.sh
         component: buildah-dev
 
