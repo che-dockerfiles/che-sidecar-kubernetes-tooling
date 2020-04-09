@@ -45,21 +45,21 @@ commands:
             chmod +x dev/login.sh; \
           fi; \
           pwd; \
-          ./dev/login.sh
+          dev/login.sh
         component: buildah-dev
 
   - name: '2. Build the image'
     actions:
       - workdir: /projects/che-sidecar-kubernetes-tooling
         type: exec
-        command:
+        command: |
           if [ ! -f "dev/build.sh" ]; then \
             mkdir -p dev; \
             curl -o dev/build.sh https://raw.githubusercontent.com/vitaliy-guliy/che-sidecar-kubernetes-tooling/dev/dev/build.sh; \
             chmod +x dev/build.sh; \
           fi; \
           pwd; \
-          ./dev/build.sh        
+          dev/build.sh        
         component: buildah-dev
 
   - name: '3. Push to quay.io'
@@ -67,19 +67,13 @@ commands:
       - workdir: /projects/che-sidecar-kubernetes-tooling
         type: exec
         command: |
-          if [ -f "/tmp/username" ]; then \
-            USERNAME=`cat /tmp/username`; \
-            PLUGIN_IMAGE_ID=`buildah images -q quay.io/$USERNAME/che-sidecar-kubernetes-tooling`; \
-            echo 'The last built image ID is :' $PLUGIN_IMAGE_ID; \
-            PLUGIN_IMAGE=quay.io/$USERNAME/che-sidecar-kubernetes-tooling:dev; \
-            echo 'Writing plugin image to a file in temp...'; \
-            echo $PLUGIN_IMAGE > /tmp/plugin_image; \
-            echo 'Pushing image' $PLUGIN_IMAGE; \
-            buildah push $PLUGIN_IMAGE_ID docker://$PLUGIN_IMAGE; \
-            echo 'Done'; \
-          else \
-            echo 'The first, you need to login and build the image'; \
-          fi
+          if [ ! -f "dev/push.sh" ]; then \
+            mkdir -p dev; \
+            curl -o dev/push.sh https://raw.githubusercontent.com/vitaliy-guliy/che-sidecar-kubernetes-tooling/dev/dev/push.sh; \
+            chmod +x dev/push.sh; \
+          fi; \
+          pwd; \
+          dev/push.sh
         component: buildah-dev
 
   - name: '4. Publish plugin.meta.yaml'
