@@ -7,10 +7,8 @@ projects:
   - name: che-sidecar-kubernetes-tooling
     source:
       location: 'https://github.com/che-dockerfiles/che-sidecar-kubernetes-tooling'
-      # location: 'https://github.com/vitaliy-guliy/che-sidecar-kubernetes-tooling'
       type: git
-      branch: master
-      # branch: dev
+      branch: '1.1.0'
 
   - name: vscode-kubernetes-tools
     source:
@@ -18,10 +16,29 @@ projects:
       type: git
       branch: master
 
+  - name: che-theia
+    source:
+      location: 'https://github.com/eclipse/che-theia'
+      type: git
+      branch: master
+
 components:
   - type: cheEditor
     id: eclipse/che-theia/7.10.0
-    memoryLimit: 1500M
+    alias: che-theia
+    memoryLimit: 3072Mi
+
+  - type: dockerimage
+    image: 'quay.io/eclipse/che-theia-dev:next'
+    alias: che-dev
+    mountSources: true
+    endpoints:
+      - name: theia-dev-flow
+        port: 3010
+        attributes:
+          protocol: http
+          public: 'true'
+    memoryLimit: 3Gi
 
   - type: dockerimage
     image: 'quay.io/eclipse/che-sidecar-kubernetes-tooling:1.1.0-31a8464'
@@ -36,7 +53,77 @@ components:
 
 commands:
 
-  - name: '1. Login to quay.io'
+  #
+  # Installs node dependencies, compiles VSCode Kubernetes extension
+  #
+  - name: '1.1 Kubernetes Plugin :: Install dependencies'
+    actions:
+      - workdir: /projects/vscode-kubernetes-tools
+        type: exec
+        command: |
+          npm install;
+          echo -e "\e[32mDone.\e[0m"
+        component: che-dev
+
+  #
+  # Packages VSCode Kubernetes extension to vsx file
+  #
+  - name: '1.2 Kubernetes Plugin :: Package'
+    actions:
+      - workdir: /projects/vscode-kubernetes-tools
+        type: exec
+        command: |
+          vsce package;
+          echo -e "\e[32mPackaging complete.\e[0m"
+        component: che-dev
+  
+  #
+  # Compiles che-theia-plugin-remote
+  #
+  - name: '1.3 Che-Theia plugin-remote :: Compile'
+    actions:
+      - workdir: /projects/che-theia/extensions/eclipse-che-theia-plugin-remote
+        type: exec
+        command: |
+          yarn;
+          echo -e "\e[32mDone.\e[0m"
+        component: che-dev
+
+  #
+  # Runs remote VSCode Kubernetes extension
+  #
+  - name: '2.1 Run :: Remote Kubernetes extension'
+    actions:
+      - workdir: /projects/che-theia/extensions/eclipse-che-theia-plugin-remote/lib/node
+        type: exec
+        command: >
+          mkdir -p /tmp/vscode-plugins;
+          curl -o /tmp/vscode-plugins/redhat.vscode-yaml-0.7.2.vsix https://github.com/redhat-developer/vscode-yaml/releases/download/0.7.2/redhat.vscode-yaml-0.7.2.vsix;
+          export THEIA_PLUGIN_ENDPOINT_DISCOVERY_PORT='2504';
+          export THEIA_PLUGINS='local-dir:///tmp/vscode-plugins,local-dir:///projects/vscode-kubernetes-tools';
+          export THEIA_PLUGIN_ENDPOINT_PORT='10000';
+          node plugin-remote.js;
+          echo -e "\e[32mDone.\e[0m"
+        component: buildah-dev
+
+  #
+  # Runs test Che-Theia instance
+  #
+  - name: '2.2 Run :: Che-Theia'
+    actions:
+      - workdir: /home/theia
+        type: exec
+        command: |
+          mkdir -p /tmp/theiadev_projects;
+          export CHE_PROJECTS_ROOT=/tmp/theiadev_projects;
+          export THEIA_PLUGIN_ENDPOINT_DISCOVERY_PORT='2504'
+          node src-gen/backend/main.js /tmp/theiadev_projects --hostname=0.0.0.0 --port=3130
+        component: che-theia
+
+  #
+  # Logins to quay.io
+  #
+  - name: '3.1 Login to quay.io'
     actions:
       - workdir: /projects/che-sidecar-kubernetes-tooling
         type: exec
@@ -49,7 +136,10 @@ commands:
           dev/login.sh
         component: buildah-dev
 
-  - name: '2. Build the image'
+  #
+  # Builds image with Kubernetes plugin
+  #
+  - name: '3.2 Build the image'
     actions:
       - workdir: /projects/che-sidecar-kubernetes-tooling
         type: exec
@@ -63,7 +153,10 @@ commands:
           dev/build.sh        
         component: buildah-dev
 
-  - name: '3. Push to quay.io'
+  #
+  # Pushes the image to quay.io
+  # 
+  - name: '3.3 Push to quay.io'
     actions:
       - workdir: /projects/che-sidecar-kubernetes-tooling
         type: exec
@@ -75,33 +168,5 @@ commands:
           fi; \
           pwd; \
           dev/push.sh
-        component: buildah-dev
-
-  - name: '4. Publish plugin.meta.yaml'
-    actions:
-      - workdir: /projects/che-sidecar-kubernetes-tooling
-        type: exec
-        command: |
-          if [ ! -f "dev/publish.meta.yaml.sh" ]; then \
-            mkdir -p dev; \
-            curl -o dev/publish.meta.yaml.sh $DEV_RESOURCES/publish.meta.yaml.sh; \
-            chmod +x dev/publish.meta.yaml.sh; \
-          fi; \
-          pwd; \
-          dev/publish.meta.yaml.sh
-        component: buildah-dev
-
-  - name: '5. Publish devfile.yaml'
-    actions:
-      - workdir: /projects/che-sidecar-kubernetes-tooling
-        type: exec
-        command: |
-          if [ ! -f "dev/publish.devfile.sh" ]; then \
-            mkdir -p dev; \
-            curl -o dev/publish.devfile.sh $DEV_RESOURCES/publish.devfile.sh; \
-            chmod +x dev/publish.devfile.sh; \
-          fi; \
-          pwd; \
-          dev/publish.devfile.sh
         component: buildah-dev
 

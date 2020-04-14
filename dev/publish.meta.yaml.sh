@@ -10,8 +10,11 @@
 # See: https://sipb.mit.edu/doc/safe-shell/
 
 if [ -f "/tmp/username" ]; then
-    echo 'Downloading template for plugin meta.yaml...'
-    curl -o /tmp/plugin-template.meta.yaml https://raw.githubusercontent.com/vitaliy-guliy/che-sidecar-kubernetes-tooling/dev/dev/plugin-template.meta.yaml
+
+    if [ ! -f "dev/plugin-template.meta.yaml" ]; then
+        echo 'Downloading template for plugin meta.yaml...'
+        curl -o dev/plugin-template.meta.yaml $DEV_RESOURCES/plugin-template.meta.yaml
+    fi
 
     echo 'Generating plugin meta.yaml...'
     PLUGIN_IMAGE=`cat /tmp/plugin_image`
