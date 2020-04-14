@@ -70,8 +70,8 @@ commands:
       - workdir: /projects/vscode-kubernetes-tools
         type: exec
         command: |
-          npm install;
-          echo -e "\e[32mDone.\e[0m"
+          npm install
+          echo -e "\n\e[32mDone.\e[0m"
         component: che-dev
 
   #
@@ -82,8 +82,8 @@ commands:
       - workdir: /projects/vscode-kubernetes-tools
         type: exec
         command: |
-          vsce package;
-          echo -e "\e[32mPackaging complete.\e[0m"
+          vsce package
+          echo -e "\n\e[32mPackaging complete.\e[0m"
         component: che-dev
   
   #
@@ -94,8 +94,8 @@ commands:
       - workdir: /projects/che-theia/extensions/eclipse-che-theia-plugin-remote
         type: exec
         command: |
-          yarn;
-          echo -e "\e[32mDone.\e[0m"
+          yarn
+          echo -e "\n\e[32mDone.\e[0m"
         component: che-dev
 
   #
@@ -104,15 +104,16 @@ commands:
   # export THEIA_PLUGIN_ENDPOINT_PORT='10000';
   - name: '2.1 Run :: Remote Kubernetes extension'
     actions:
-      - workdir: /projects/che-theia/extensions/eclipse-che-theia-plugin-remote/lib/node
+      - workdir: /tmp
         type: exec
-        command: >
-          mkdir -p /tmp/vscode-plugins;
-          curl -o /tmp/vscode-plugins/redhat.vscode-yaml-0.7.2.vsix https://github.com/redhat-developer/vscode-yaml/releases/download/0.7.2/redhat.vscode-yaml-0.7.2.vsix;
-          export THEIA_PLUGIN_ENDPOINT_DISCOVERY_PORT='2504';
-          export THEIA_PLUGINS='local-dir:///tmp/vscode-plugins,local-dir:///projects/vscode-kubernetes-tools';
-          node plugin-remote.js;
-          echo -e "\e[32mDone.\e[0m"
+        command: |
+          mkdir -p /tmp/vscode-plugins
+          cd /tmp/vscode-plugins
+          curl -O -L https://github.com/redhat-developer/vscode-yaml/releases/download/0.7.2/redhat.vscode-yaml-0.7.2.vsix
+          export THEIA_PLUGIN_ENDPOINT_DISCOVERY_PORT='2504'
+          export THEIA_PLUGINS='local-dir:///tmp/vscode-plugins,local-dir:///projects/vscode-kubernetes-tools'
+          node /projects/che-theia/extensions/eclipse-che-theia-plugin-remote/lib/node/plugin-remote.js
+          echo -e "\n\e[32mDone.\e[0m"
         component: buildah-dev
 
   #
@@ -123,27 +124,16 @@ commands:
       - workdir: /home/theia
         type: exec
         command: |
-          mkdir -p /tmp/theiadev_projects;
-          export CHE_PROJECTS_ROOT=/tmp/theiadev_projects;
-          export THEIA_PLUGIN_ENDPOINT_DISCOVERY_PORT='2504';
+          mkdir -p /tmp/theiadev_projects
+          export CHE_PROJECTS_ROOT=/tmp/theiadev_projects
+          export THEIA_PLUGIN_ENDPOINT_DISCOVERY_PORT='2504'
           node src-gen/backend/main.js /tmp/theiadev_projects --hostname=0.0.0.0 --port=3130
+          echo -e "\e[32mDone.\e[0m"
         component: che-theia
 
   #
   # Logins to quay.io
   #
-  # - name: '3.1 Login to quay.io'
-  #   actions:
-  #     - workdir: /projects/che-sidecar-kubernetes-tooling
-  #       type: exec
-  #       command: |
-  #         if [ ! -f "dev/login.sh" ]; then \
-  #           mkdir -p dev; \
-  #           curl -o dev/login.sh $DEV_RESOURCES/login.sh; \
-  #           chmod +x dev/login.sh; \
-  #         fi; \
-  #         dev/login.sh
-  #       component: buildah-dev
   - name: '3.1 Login to quay.io'
     actions:
       - workdir: /projects/che-sidecar-kubernetes-tooling
@@ -153,7 +143,7 @@ commands:
             read -p "Username: " USERNAME &&
             buildah login --username $USERNAME quay.io &&
             echo $USERNAME > /tmp/username &&
-            echo 'Done'
+            echo -e "\e[32mDone.\e[0m"
           else
             echo 'You already logged in as' `cat /tmp/username`
           fi
@@ -172,7 +162,7 @@ commands:
               buildah bud -t quay.io/$USERNAME/che-sidecar-kubernetes-tooling:dev .
               echo 'Image built'
               buildah images
-              echo 'Done'
+              echo -e "\e[32mDone.\e[0m"
           else
               echo 'You need to login the first'
           fi
@@ -185,7 +175,7 @@ commands:
     actions:
       - workdir: /projects/che-sidecar-kubernetes-tooling
         type: exec
-        command: >
+        command: |
           if [ -f "/tmp/username" ]; then
               USERNAME=`cat /tmp/username`
               PLUGIN_IMAGE_ID=`buildah images -q quay.io/$USERNAME/che-sidecar-kubernetes-tooling`
@@ -194,7 +184,7 @@ commands:
               echo 'Pushing image' $PLUGIN_IMAGE
               echo $PLUGIN_IMAGE > /tmp/plugin_image
               buildah push $PLUGIN_IMAGE_ID docker://$PLUGIN_IMAGE
-              echo 'Done'
+              echo -e "\e[32mDone.\e[0m"
           else
               echo 'The first, you need to login and build the image'
           fi
