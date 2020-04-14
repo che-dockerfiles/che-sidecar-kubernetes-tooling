@@ -11,4 +11,6 @@ Here are branches:
  - [1.0.0](https://github.com/che-dockerfiles/che-sidecar-kubernetes-tooling/tree/1.0.0)
  - [0.1.17](https://github.com/che-dockerfiles/che-sidecar-kubernetes-tooling/tree/0.1.17)
 
+# Contributing
 
+Contributing section is cover in [CONTRIBUTING.md](CONTRIBUTING.md)
