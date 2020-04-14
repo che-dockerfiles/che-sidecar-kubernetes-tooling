@@ -1,3 +1,12 @@
+# Copyright (c) 2020 Red Hat, Inc.
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+# See: https://sipb.mit.edu/doc/safe-shell/
+
 apiVersion: 1.0.0
 
 metadata:
@@ -92,6 +101,7 @@ commands:
   #
   # Runs remote VSCode Kubernetes extension
   #
+  # export THEIA_PLUGIN_ENDPOINT_PORT='10000';
   - name: '2.1 Run :: Remote Kubernetes extension'
     actions:
       - workdir: /projects/che-theia/extensions/eclipse-che-theia-plugin-remote/lib/node
@@ -101,7 +111,6 @@ commands:
           curl -o /tmp/vscode-plugins/redhat.vscode-yaml-0.7.2.vsix https://github.com/redhat-developer/vscode-yaml/releases/download/0.7.2/redhat.vscode-yaml-0.7.2.vsix;
           export THEIA_PLUGIN_ENDPOINT_DISCOVERY_PORT='2504';
           export THEIA_PLUGINS='local-dir:///tmp/vscode-plugins,local-dir:///projects/vscode-kubernetes-tools';
-          export THEIA_PLUGIN_ENDPOINT_PORT='10000';
           node plugin-remote.js;
           echo -e "\e[32mDone.\e[0m"
         component: buildah-dev
@@ -116,24 +125,38 @@ commands:
         command: |
           mkdir -p /tmp/theiadev_projects;
           export CHE_PROJECTS_ROOT=/tmp/theiadev_projects;
-          export THEIA_PLUGIN_ENDPOINT_DISCOVERY_PORT='2504'
+          export THEIA_PLUGIN_ENDPOINT_DISCOVERY_PORT='2504';
           node src-gen/backend/main.js /tmp/theiadev_projects --hostname=0.0.0.0 --port=3130
         component: che-theia
 
   #
   # Logins to quay.io
   #
+  # - name: '3.1 Login to quay.io'
+  #   actions:
+  #     - workdir: /projects/che-sidecar-kubernetes-tooling
+  #       type: exec
+  #       command: |
+  #         if [ ! -f "dev/login.sh" ]; then \
+  #           mkdir -p dev; \
+  #           curl -o dev/login.sh $DEV_RESOURCES/login.sh; \
+  #           chmod +x dev/login.sh; \
+  #         fi; \
+  #         dev/login.sh
+  #       component: buildah-dev
   - name: '3.1 Login to quay.io'
     actions:
       - workdir: /projects/che-sidecar-kubernetes-tooling
         type: exec
         command: |
-          if [ ! -f "dev/login.sh" ]; then \
-            mkdir -p dev; \
-            curl -o dev/login.sh $DEV_RESOURCES/login.sh; \
-            chmod +x dev/login.sh; \
-          fi; \
-          dev/login.sh
+          if [ ! -f "/tmp/username" ]; then
+            read -p "Username: " USERNAME &&
+            buildah login --username $USERNAME quay.io &&
+            echo $USERNAME > /tmp/username &&
+            echo 'Done'
+          else
+            echo 'You already logged in as' `cat /tmp/username`
+          fi
         component: buildah-dev
 
   #
@@ -144,13 +167,15 @@ commands:
       - workdir: /projects/che-sidecar-kubernetes-tooling
         type: exec
         command: |
-          if [ ! -f "dev/build.sh" ]; then \
-            mkdir -p dev; \
-            curl -o dev/build.sh $DEV_RESOURCES/build.sh; \
-            chmod +x dev/build.sh; \
-          fi; \
-          pwd; \
-          dev/build.sh        
+          if [ -f "/tmp/username" ]; then
+              USERNAME=`cat /tmp/username`
+              buildah bud -t quay.io/$USERNAME/che-sidecar-kubernetes-tooling:dev .
+              echo 'Image built'
+              buildah images
+              echo 'Done'
+          else
+              echo 'You need to login the first'
+          fi
         component: buildah-dev
 
   #
@@ -160,13 +185,18 @@ commands:
     actions:
       - workdir: /projects/che-sidecar-kubernetes-tooling
         type: exec
-        command: |
-          if [ ! -f "dev/push.sh" ]; then \
-            mkdir -p dev; \
-            curl -o dev/push.sh $DEV_RESOURCES/push.sh; \
-            chmod +x dev/push.sh; \
-          fi; \
-          pwd; \
-          dev/push.sh
+        command: >
+          if [ -f "/tmp/username" ]; then
+              USERNAME=`cat /tmp/username`
+              PLUGIN_IMAGE_ID=`buildah images -q quay.io/$USERNAME/che-sidecar-kubernetes-tooling`
+              echo 'The last built image ID is :' $PLUGIN_IMAGE_ID
+              PLUGIN_IMAGE=quay.io/$USERNAME/che-sidecar-kubernetes-tooling:dev
+              echo 'Pushing image' $PLUGIN_IMAGE
+              echo $PLUGIN_IMAGE > /tmp/plugin_image
+              buildah push $PLUGIN_IMAGE_ID docker://$PLUGIN_IMAGE
+              echo 'Done'
+          else
+              echo 'The first, you need to login and build the image'
+          fi
         component: buildah-dev
 
