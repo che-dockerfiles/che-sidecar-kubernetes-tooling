@@ -13,4 +13,4 @@ Here are branches:
 
 # Contributing
 
-Contributing section is cover in [CONTRIBUTING.md](CONTRIBUTING.md)
+Contributing section is covered in [CONTRIBUTING.md](CONTRIBUTING.md)

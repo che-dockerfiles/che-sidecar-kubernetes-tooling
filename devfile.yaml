@@ -47,7 +47,7 @@ components:
         attributes:
           protocol: http
           public: 'true'
-    memoryLimit: 3Gi
+    memoryLimit: 2048Mi
 
   - type: dockerimage
     image: 'quay.io/eclipse/che-sidecar-kubernetes-tooling:1.1.0-31a8464'
