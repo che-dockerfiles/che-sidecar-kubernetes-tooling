@@ -107,6 +107,7 @@ $ export THEIA_PLUGIN_ENDPOINT_DISCOVERY_PORT='2504'
 $ node src-gen/backend/main.js /tmp/theiadev_projects --hostname=0.0.0.0 --port=3130
 ```
 
+Click on `theia-ide/theia-dev` tree node in `MY WORKSPACE` view to open a new browser window with a separete Che-Theia instance.
 To stop the command execution, focus the command output view and click `Ctrl+C`.
 
 ## Eclipse Che Sidecar container for Kubernetes plugin
