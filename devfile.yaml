@@ -57,8 +57,6 @@ components:
     env:
       - name: PLUGIN_REMOTE_ENDPOINT_EXECUTABLE
         value: 'tail -f /dev/null'
-      - name: DEV_RESOURCES
-        value: 'https://raw.githubusercontent.com/vitaliy-guliy/che-sidecar-kubernetes-tooling/dev/dev'
 
 commands:
 
@@ -101,7 +99,6 @@ commands:
   #
   # Runs remote VSCode Kubernetes extension
   #
-  # export THEIA_PLUGIN_ENDPOINT_PORT='10000';
   - name: '2.1 Run :: Remote Kubernetes extension'
     actions:
       - workdir: /tmp
