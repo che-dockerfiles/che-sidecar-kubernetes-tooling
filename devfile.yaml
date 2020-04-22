@@ -53,7 +53,7 @@ components:
     image: 'quay.io/eclipse/che-sidecar-kubernetes-tooling:1.1.0-31a8464'
     alias: buildah-dev
     mountSources: true
-    memoryLimit: 3Gi
+    memoryLimit: 1536Mi
     env:
       - name: PLUGIN_REMOTE_ENDPOINT_EXECUTABLE
         value: 'tail -f /dev/null'

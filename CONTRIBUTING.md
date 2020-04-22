@@ -155,4 +155,4 @@ $ PLUGIN_IMAGE=quay.io/$USERNAME/che-sidecar-kubernetes-tooling:dev
 $ buildah push $PLUGIN_IMAGE_ID docker://$PLUGIN_IMAGE
 ```
 
-The memory limitation for `buildah-dev` container is set to 3 gigabytes, which should be enough for most cases. In case you cannot build the image due to lack of memory, you can easily add more by editing the devfile in the dashboard. To apply the changes, you need to restart the workspace.
+The memory limitation for `buildah-dev` container is set to 1.5 gigabytes, which should be enough for most cases. In case you cannot build the image due to lack of memory, you can easily add more by editing the devfile in the dashboard. To apply the changes, you need to restart the workspace.
