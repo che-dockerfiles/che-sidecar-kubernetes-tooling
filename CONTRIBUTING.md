@@ -82,7 +82,7 @@ $ yarn
 
 ### Run Che-Theia + VS Code Kubernetes tooling extension
 
-The `buildah-dev` container is used to run the kubernetes tooling extension. Projects (`/projects`) directory is shared between containers, and the built `eclipse-che-theia-plugin-remote` is accesisble from `buildah-dev`.
+The `buildah-dev` container is used to run the kubernetes tooling extension. The projects (`/projects`) directory is shared between containers, and the built `eclipse-che-theia-plugin-remote` is accesisble from `buildah-dev`.
 To run the extension use `'2.1 Run :: Remote Kubernetes extension'` command. The command will configure necessary environment variables, download the latest release of [redhat.vscode-yaml](https://github.com/redhat-developer/vscode-yaml/releases) extension on which the Kubernetes tooling depends, and will run `eclipse-che-theia-plugin-remote`.
 
 [buildah-dev]
