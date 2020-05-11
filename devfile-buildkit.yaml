@@ -20,14 +20,10 @@ projects:
       branch: '1.1.0'
 
 components:
-  - type: cheEditor
-    id: eclipse/che-theia/7.10.0
-    alias: che-theia
-    memoryLimit: 1.5Gi
 
   # This section will be changed on Che buildkit plugin
   - type: dockerimage
-    image: quay.io/vgulyy/buildkit:0.7.1
+    image: quay.io/eclipse/che-buildkit-base:0.7.1-bacb069
     alias: buildkit-dev
     mountSources: true
     memoryLimit: 2Gi
