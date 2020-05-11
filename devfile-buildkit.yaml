@@ -25,6 +25,7 @@ components:
     alias: che-theia
     memoryLimit: 1.5Gi
 
+  # This section will be changed on Che buildkit plugin
   - type: dockerimage
     image: quay.io/vgulyy/buildkit:0.7.1
     alias: buildkit-dev
