@@ -1,0 +1,78 @@
+# Copyright (c) 2020 Red Hat, Inc.
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+# See: https://sipb.mit.edu/doc/safe-shell/
+
+apiVersion: 1.0.0
+
+metadata:
+  name: buildkit-tooling-dev
+
+projects:
+  - name: che-sidecar-kubernetes-tooling
+    source:
+      location: 'https://github.com/che-dockerfiles/che-sidecar-kubernetes-tooling'
+      type: git
+      branch: '1.1.0'
+
+components:
+  - type: cheEditor
+    id: eclipse/che-theia/7.10.0
+    alias: che-theia
+    memoryLimit: 1.5Gi
+
+  - type: dockerimage
+    image: quay.io/vgulyy/buildkit:0.7.1
+    alias: buildkit-dev
+    mountSources: true
+    memoryLimit: 2Gi
+    volumes:
+      - name: buildkit-share
+        containerPath: /home/user/.local/share/buildkit
+      - name: buildkit-lib
+        containerPath: /var/lib/buildkit
+
+commands:
+
+  #
+  # Generate config.json with credentials to the Container Registry
+  #
+  - name: '1.1 Specify Container Registry'
+    actions:
+      - workdir: /projects/che-sidecar-kubernetes-tooling
+        type: exec
+        command: |
+          read -p "Container Registry: " REGISTRY &&
+          echo -n $REGISTRY > $HOME/.docker/registry &&
+          read -p "User: " USER &&
+          echo -n $USER > $HOME/.docker/user &&
+          read -s -p "Password: " PASSWORD &&
+          echo -e "\nGenerating \e[93m$HOME/.docker/config.json\e[0m..." &&
+          auth=`echo -n $USER:$PASSWORD | base64` &&
+          echo -e '{"auths": {"'$REGISTRY'": {"auth": "'$auth'"}}}' > $HOME/.docker/config.json &&
+          echo -e "\e[32mDone.\e[0m"
+        component: buildkit-dev
+
+  #
+  # Builds image with Kubernetes plugin
+  #
+  - name: '1.2 Build and Push the image'
+    actions:
+      - workdir: /projects/che-sidecar-kubernetes-tooling
+        type: exec
+        command: |
+          REGISTRY=`cat $HOME/.docker/registry`
+          USER=`cat $HOME/.docker/user`
+          IMAGE=$REGISTRY/$USER/che-sidecar-kubernetes-tooling:dev-buildkit
+          echo -e "Building \e[93m$IMAGE\e[0m..."
+          buildctl-daemonless.sh build \
+            --frontend=dockerfile.v0 \
+            --local context=. \
+            --local dockerfile=. \
+            --output type=image,name=$IMAGE,push=true &&
+          echo -e "\e[32mDone.\e[0m"
+        component: buildkit-dev
