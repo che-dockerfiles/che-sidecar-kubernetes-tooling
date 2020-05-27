@@ -35,7 +35,7 @@ The newly created workspace will have the following containers:
 
 The third, **buildah-dev** is needed to run Kubernetes tooloing extension as a remote plugin and to build sidecar docker image for Eclipse Che Kubernetes plugin. It should be emphasized that the target directory with build images is not persisted, will be lost after restarting the workspace. You need to push your images to [docker.io](docker.io) or [quay.io](quay.io) before leaving the workspace.
 
-After startup, your workspace will have the followind projects:
+After startup, your workspace will have the following projects:
 - che-sidecar-kubernetes-tooling
 - che-theia
 - vscode-kubernetes-tools
@@ -89,7 +89,7 @@ To run the extension use `'2.1 Run :: Remote Kubernetes extension'` command. The
 ```
 $ mkdir -p /tmp/vscode-plugins
 $ cd /tmp/vscode-plugins
-$ curl -O -L https://github.com/redhat-developer/vscode-yaml/releases/download/0.7.2/redhat.vscode-yaml-0.7.2.vsix
+$ curl -O -L https://download.jboss.org/jbosstools/vscode/3rdparty/vscode-yaml/vscode-yaml-0.8.0.vsix
 $ export THEIA_PLUGIN_ENDPOINT_DISCOVERY_PORT='2504'
 $ export THEIA_PLUGINS='local-dir:///tmp/vscode-plugins,local-dir:///projects/vscode-kubernetes-tools'
 $ node /projects/che-theia/extensions/eclipse-che-theia-plugin-remote/lib/node/plugin-remote.js
