@@ -21,17 +21,9 @@ projects:
 
 components:
 
-  # This section will be changed on Che buildkit plugin
-  - type: dockerimage
-    image: quay.io/eclipse/che-buildkit-base:0.7.1-bacb069
+  - type: chePlugin
+    id: moby/buildkit/latest
     alias: buildkit-dev
-    mountSources: true
-    memoryLimit: 2Gi
-    volumes:
-      - name: buildkit-share
-        containerPath: /home/user/.local/share/buildkit
-      - name: buildkit-lib
-        containerPath: /var/lib/buildkit
 
 commands:
 
