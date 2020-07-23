@@ -8,7 +8,7 @@
 # Contributors:
 #   Red Hat, Inc. - initial API and implementation
 
-FROM quay.io/eclipse/che-container-tools:1.0.0-36dcd2a
+FROM quay.io/eclipse/che-container-tools:1.0.0-8caea0f
 
 ADD etc/storage.conf ${HOME}/.config/containers/storage.conf
 ADD etc/containers.conf ${HOME}/.config/containers/containers.conf
@@ -17,8 +17,6 @@ ADD etc/subgid /etc/subgid
 
 # buildah login requires writing to /run
 RUN chgrp -R 0 /run && chmod -R g+rwX /run && \
-    # 'which' utility is used by VS Code Kubernetes extension to find the binaries, e.g. 'kubectl'
-    dnf install -y which nodejs && \
     mkdir -p /var/tmp/containers/runtime && \
     chmod -R g+rwX /var/tmp/containers
 
