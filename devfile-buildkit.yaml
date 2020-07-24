@@ -24,6 +24,7 @@ components:
   - type: chePlugin
     id: moby/buildkit/latest
     alias: buildkit-dev
+    memoryLimit: 1500Mi
 
 commands:
 
